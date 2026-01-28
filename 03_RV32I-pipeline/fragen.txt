@@ -1,0 +1,21 @@
+1)
+
+1. read register 1
+2. read register 2
+3. write register
+
+
+2)
+
+1. Load-Instruction followed by an Instruction that uses it's result
+2. A sequence of R-type Instructions(Add,Sub), where each instruction depends on it's immediate predecessor
+
+
+3)
+
+1. writing in x0
+2. reading and writing in the same register
+3. testing highest and lowest values with I-type instructions
+4. negative numbers
+5. combining R_type and I-type instructions
+6. multiple independent instructions

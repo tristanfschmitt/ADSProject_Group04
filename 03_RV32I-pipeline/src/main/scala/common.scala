@@ -9,7 +9,7 @@ Global Definitions and Data Types
 
 Enumerations:
     uopc: ChiselEnum defining micro-operation codes for all supported RV32I instructions:
-        R-type instructions 
+        R-type instructions
         I-type instructions
         NOP (no operation, default case)
 
@@ -27,4 +27,9 @@ import chisel3.experimental.ChiselEnum
 // Global Definitions and Data Types
 // -----------------------------------------
 
-//ToDo: Add your implementation according to the specification above here 
+object uopc extends ChiselEnum {
+  val NOP,
+  /*R-Type*/ ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND,
+  /*I-Type*/ ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI
+  = Value
+}

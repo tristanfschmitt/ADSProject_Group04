@@ -45,4 +45,108 @@ import uopc._
 // Decode Stage
 // -----------------------------------------
 
-//ToDo: Add your implementation according to the specification above here 
+class IDstage extends Module {
+  val io = IO(new Bundle {
+    val inInstr = Input(UInt(32.W))
+    val uop = Output(uopc())
+    val rd = Output(UInt(5.W))
+    val operandA = Output(UInt(32.W))
+    val operandB = Output(UInt(32.W))
+    val XcptInvalid = Output(Bool())
+  })
+
+  val regFile = Module(new RegisterFile)
+
+  io.rd := io.inInstr(11, 7)
+
+  regFile.io.req_1.addr := io.inInstr(19, 15)
+  regFile.io.req_2.addr := io.inInstr(24, 20)
+
+  io.operandA := regFile.io.resp_1.data
+
+  val opcode = io.inInstr(6, 0)
+  val funct3 = io.inInstr(14, 12)
+  val funct7 = io.inInstr(31, 25)
+
+  val uopReg = WireDefault(uopc.NOP)
+  val xcptInvalid = WireDefault(false.B)
+
+  switch(opcode) {
+    is("b0110011".U) { // R-Type
+      switch(funct3) {
+        is("b000".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.ADD }
+            .elsewhen(funct7 === "b0100000".U) { uopReg := uopc.SUB }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b001".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.SLL }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b010".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.SLT }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b011".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.SLTU }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b100".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.XOR }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b101".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.SRL }
+            .elsewhen(funct7 === "b0100000".U) { uopReg := uopc.SRA }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b110".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.OR }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b111".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.AND }
+            .otherwise { xcptInvalid := true.B }
+        }
+        otherwise { xcptInvalid := true.B }
+      }
+    }
+
+    is("b0010011".U) { // I-Type ALU
+      switch(funct3) {
+        is("b000".U) { uopReg := uopc.ADDI }
+        is("b010".U) { uopReg := uopc.SLTI }
+        is("b011".U) { uopReg := uopc.SLTIU }
+        is("b100".U) { uopReg := uopc.XORI }
+        is("b110".U) { uopReg := uopc.ORI  }
+        is("b111".U) { uopReg := uopc.ANDI }
+        is("b001".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.SLLI }
+            .otherwise { xcptInvalid := true.B }
+        }
+        is("b101".U) {
+          when(funct7 === "b0000000".U) { uopReg := uopc.SRLI }
+            .elsewhen(funct7 === "b0100000".U) { uopReg := uopc.SRAI }
+            .otherwise { xcptInvalid := true.B }
+        }
+        otherwise { xcptInvalid := true.B }
+      }
+    }
+
+    otherwise {
+      xcptInvalid := true.B
+    }
+  }
+
+  io.uop := uopReg
+  io.XcptInvalid := xcptInvalid
+
+  when(opcode === "b0110011".U) { //R-Type
+    io.operandB := regFile.io.resp_2.data
+  }.elsewhen(opcode === "b0010011".U) { //I-Type
+    io.operandB := Cat(Fill(20, io.inInstr(31)), io.inInstr(31,20))
+  }.otherwise {
+    io.operandB := 0.U
+  }
+
+}
