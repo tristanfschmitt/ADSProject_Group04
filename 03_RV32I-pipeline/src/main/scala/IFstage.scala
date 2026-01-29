@@ -52,5 +52,5 @@ class IFstage (BinaryFile: String) extends Module {
 
   io.instr := IMem(PC)
 
-  PC := PC + 4.U
+  PC := PC + 1.U
 }

@@ -17,7 +17,7 @@ class PipelinedRISCV32ITest extends AnyFlatSpec with ChiselScalatestTester {
     test(new PipelinedRV32I("src/test/programs/BinaryFile_pipelined")).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
 
       dut.clock.setTimeout(0)
-      dut.clock.step(5)
+      dut.clock.step(4)
       dut.io.result.expect(0.U)     // ADDI x0, x0, 0
       dut.io.exception.expect(false.B)
       dut.clock.step(1)

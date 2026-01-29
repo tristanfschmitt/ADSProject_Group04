@@ -58,7 +58,6 @@ class EXstage extends Module {
   alu.io.operation := ALUOp.PASSB
 
   io.aluResult := 0.U
-  io.exception := true.B
 
   when(io.inXcptInvalid === false.B) {
     switch(io.inUOP) {
@@ -94,7 +93,11 @@ class EXstage extends Module {
       }
     }
 
+    io.exception := false.B
+
     io.aluResult := alu.io.aluResult
+  }.otherwise {
+    io.exception := true.B
   }
 
 }

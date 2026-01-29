@@ -54,9 +54,9 @@ class WBstage extends Module {
   })
 
   when(io.exception) {
-    io.outWr_en := true.B
-  }.otherwise {
     io.outWr_en := false.B
+  }.otherwise {
+    io.outWr_en := true.B
   }
 
   io.outRd := io.rd
