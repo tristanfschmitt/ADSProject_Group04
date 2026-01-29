@@ -55,8 +55,12 @@ class EXstage extends Module {
 
   alu.io.operandA := io.inOperandA
   alu.io.operandB := io.inOperandB
+  alu.io.operation := ALUOp.PASSB
 
-  when(io.inXcptInvalid === false.U) {
+  io.aluResult := 0.U
+  io.exception := true.B
+
+  when(io.inXcptInvalid === false.B) {
     switch(io.inUOP) {
       is(uopc.ADD, uopc.ADDI) {
         alu.io.operation := ALUOp.ADD
@@ -88,17 +92,9 @@ class EXstage extends Module {
       is(uopc.SLTU, uopc.SLTIU) {
         alu.io.operation := ALUOp.SLTU
       }
-      otherwise {
-        alu.io.operation := ALUOp.PASSB
-      }
     }
 
     io.aluResult := alu.io.aluResult
-
-  }.otherwise {
-    io.aluResult := 0.U
-    io.exception := true
   }
-
 
 }

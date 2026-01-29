@@ -56,9 +56,9 @@ class IDbarrier extends Module {
 
   val UOPReg = RegInit(uopc.NOP)
   val RDReg = RegInit(0.U(5.W))
-  val OperandAReg = RegInit(0.U(32.W))
-  val OperandBReg = RegInit(0.U(32.W))
-  val XcptInvalidReg = RegInit(false.B)
+  val operandAReg = RegInit(0.U(32.W))
+  val operandBReg = RegInit(0.U(32.W))
+  val xcptInvalidReg = RegInit(false.B)
 
   UOPReg         := io.inUOP
   RDReg          := io.inRD

@@ -39,7 +39,7 @@ import chisel3.util.experimental.loadMemoryFromFile
 // Fetch Stage
 // -----------------------------------------
 
-class IF (BinaryFile: String) extends Module {
+class IFstage (BinaryFile: String) extends Module {
   val io = IO(new Bundle {
     val instr = Output(UInt(32.W))
   })
@@ -52,5 +52,5 @@ class IF (BinaryFile: String) extends Module {
 
   io.instr := IMem(PC)
 
-  PC := PC + 4
+  PC := PC + 4.U
 }

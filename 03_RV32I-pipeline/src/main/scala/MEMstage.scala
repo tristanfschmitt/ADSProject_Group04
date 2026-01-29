@@ -24,11 +24,17 @@ import chisel3._
 // Memory Stage
 // -----------------------------------------
 
-class MEM extends Module {
+class MEMstage extends Module {
   val io = IO(new Bundle {
+    val inAluResult = Input(UInt(32.W))
+    val inException = Input(Bool())
 
+    val outAluResult = Output(UInt(32.W))
+    val outException = Output(Bool())
   })
 
-  // No memory operations implemented in Assignment03, nothing to do here! :)
+  io.outAluResult := io.inAluResult
+  io.outException := io.inException
+
 
 }

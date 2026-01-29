@@ -40,4 +40,27 @@ import chisel3._
 // Writeback Stage
 // -----------------------------------------
 
-//ToDo: Add your implementation according to the specification above here 
+class WBstage extends Module {
+  val io = IO(new Bundle {
+    val aluResult = Input(UInt(32.W))
+    val rd = Input(UInt(5.W))
+    val exception = Input(Bool())
+
+    val outRd = Output(UInt(5.W))
+    val outData = Output(UInt(32.W))
+    val outWr_en = Output(Bool())
+
+    val check_res = Output(UInt(32.W))
+  })
+
+  when(io.exception) {
+    io.outWr_en := true.B
+  }.otherwise {
+    io.outWr_en := false.B
+  }
+
+  io.outRd := io.rd
+  io.outData := io.aluResult
+
+  io.check_res := io.aluResult
+}

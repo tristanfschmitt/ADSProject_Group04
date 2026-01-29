@@ -58,9 +58,60 @@ import uopc._
 
 class PipelinedRV32Icore (BinaryFile: String) extends Module {
   val io = IO(new Bundle {
-    //ToDo: Add I/O ports
+    val check_res = Output(UInt(32.W))
+    val exception = Output(Bool())
   })
 
-//ToDo: Add your implementation according to the specification above here 
+  val ifStage = Module(new IFstage(BinaryFile))
+  val idStage = Module(new IDstage)
+  val exStage = Module(new EXstage)
+  val memStage = Module(new MEMstage)
+  val wbStage = Module(new WBstage)
+
+  val ifBarrier = Module(new IFbarrier)
+  val idBarrier = Module(new IDbarrier)
+  val exBarrier = Module(new EXbarrier)
+  val memBarrier = Module(new MEMbarrier)
+  val wbBarrier = Module(new WBbarrier)
+
+  ifBarrier.io.inInstr := ifStage.io.instr
+
+  idStage.io.inInstr := ifBarrier.io.outInstr
+
+  idBarrier.io.inUOP := idStage.io.uop
+  idBarrier.io.inRD := idStage.io.rd
+  idBarrier.io.inOperandA := idStage.io.operandA
+  idBarrier.io.inOperandB := idStage.io.operandB
+  idBarrier.io.inXcptInvalid := idStage.io.XcptInvalid
+
+  exStage.io.inUOP := idBarrier.io.outUOP
+  exStage.io.inOperandA := idBarrier.io.outOperandA
+  exStage.io.inOperandB := idBarrier.io.outOperandB
+  exStage.io.inXcptInvalid := idBarrier.io.outXcptInvalid
+
+  exBarrier.io.inaluResult := exStage.io.aluResult
+  exBarrier.io.inRD := idBarrier.io.outRD
+  exBarrier.io.inXcptInvalid := exStage.io.exception
+
+  memStage.io.inAluResult := exBarrier.io.outAluResult
+  memStage.io.inException := exBarrier.io.outXcptInvalid
+
+  memBarrier.io.inAluResult := memStage.io.outAluResult
+  memBarrier.io.inRD := exBarrier.io.outRD
+  memBarrier.io.inException := memStage.io.outException
+
+  wbStage.io.aluResult := memBarrier.io.outAluResult
+  wbStage.io.rd := memBarrier.io.outRD
+  wbStage.io.exception := memBarrier.io.outException
+
+  idStage.io.inWr_en := wbStage.io.outWr_en
+  idStage.io.inRd := wbStage.io.outRd
+  idStage.io.inWd := wbStage.io.outData
+
+  wbBarrier.io.inCheckRes := wbStage.io.check_res
+  wbBarrier.io.inXcptInvalid := memBarrier.io.outException
+
+  io.check_res := wbBarrier.io.inCheckRes
+  io.exception := wbBarrier.io.inXcptInvalid
 
 }
