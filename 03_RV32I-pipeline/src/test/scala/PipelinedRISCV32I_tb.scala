@@ -1,9 +1,3 @@
-// ADS I Class Project
-// Pipelined RISC-V Core
-//
-// Chair of Electronic Design Automation, RPTU in Kaiserslautern
-// File created on 01/15/2023 by Tobias Jauch (@tojauch)
-
 package PipelinedRV32I_Tester
 
 import chisel3._
@@ -13,7 +7,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class PipelinedRISCV32ITest extends AnyFlatSpec with ChiselScalatestTester {
 
-"RV32I_BasicTester" should "work" in {
+  "RV32I_BasicTester" should "work" in {
     test(new PipelinedRV32I("src/test/programs/BinaryFile_pipelined")).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
 
       dut.clock.setTimeout(0)
@@ -104,7 +98,18 @@ class PipelinedRISCV32ITest extends AnyFlatSpec with ChiselScalatestTester {
       dut.clock.step(1)
       dut.io.result.expect(1.U)     // SLTU x13, x5, x4
       dut.io.exception.expect(false.B)
-      dut.clock.step(1)           
+      dut.clock.step(1)
+
+      // Neue Instruktionen
+
+      dut.io.result.expect(4294967295L.U) // ADDI x2, x0, -1 (Sign-Extension)
+      dut.io.exception.expect(false.B)
+      dut.clock.step(1)
+      dut.io.result.expect(1.U)      // ADDI x31, x31, 1
+      dut.io.exception.expect(false.B)
+      dut.clock.step(1)
+      dut.io.result.expect(1.U)      // ADDI x31, x31, 1  (without forwarding)
+      dut.io.exception.expect(false.B)
     }
   }
 }

@@ -27,4 +27,6 @@
 004236b3 // SLTU x13, x4, x4
 005236b3 // SLTU x13, x4, x5
 0042b6b3 // SLTU x13, x5, x4
-021141b3 // DIV x3, x2, x1 (NOT IMPLEMENTED!)
+fff00113 // ADDI x2, x0, -1                       extra test cases
+001f8013 // ADDI x31, x31, 1
+001f8013 // ADDI x31, x31, 1

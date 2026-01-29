@@ -3,13 +3,15 @@
 1. read register 1
 2. read register 2
 3. write register
-
+4. write data
+5. wr_en
+6. read data 1
+7. read data 2
 
 2)
 
 1. Load-Instruction followed by an Instruction that uses it's result
-2. A sequence of R-type Instructions(Add,Sub), where each instruction depends on it's immediate predecessor
-
+2. A sequence of R-type Instructions(Add,Sub), where each instruction depends on its immediate predecessor (if there is no forwarding)
 
 3)
 
@@ -17,5 +19,3 @@
 2. reading and writing in the same register
 3. testing highest and lowest values with I-type instructions
 4. negative numbers
-5. combining R_type and I-type instructions
-6. multiple independent instructions
