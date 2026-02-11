@@ -64,8 +64,6 @@ class EXstage extends Module {
 
   val alu = Module(new ALU)
 
-  alu.io.operandA := io.inOperandA
-  alu.io.operandB := io.inOperandB
   alu.io.operation := ALUOp.PASSB
 
   io.aluResult := 0.U
@@ -76,6 +74,8 @@ class EXstage extends Module {
     alu.io.operandA := io.aluResMEM
   } .elsewhen(io.RsAddr =/= 0.U && io.RsAddr === io.rdWB) {
     alu.io.operandA := io.aluResWB
+  } .otherwise {
+    alu.io.operandA := io.inOperandA
   }
 
   when(io.RtAddr =/= 0.U && io.RtAddr === io.rdEX) {
@@ -84,6 +84,8 @@ class EXstage extends Module {
     alu.io.operandB := io.aluResMEM
   } .elsewhen(io.RtAddr =/= 0.U && io.RtAddr === io.rdWB) {
     alu.io.operandB := io.aluResWB
+  } .otherwise {
+    alu.io.operandB := io.inOperandB
   }
 
   when(io.inXcptInvalid === false.B) {

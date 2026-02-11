@@ -28,8 +28,8 @@ class IDstage extends Module {
   regFile.io.req_1.addr := io.inInstr(19, 15)
   regFile.io.req_2.addr := io.inInstr(24, 20)
 
-  io.outRsAddr := io.inInstr(19, 15)
-  io.outRtAddr := io.inInstr(24, 20)
+  io.outRsAddr := 0.U
+  io.outRtAddr := 0.U
 
   regFile.io.req_3.wr_en := false.B
   regFile.io.req_3.addr := 0.U
@@ -54,6 +54,9 @@ class IDstage extends Module {
     is("b0110011".U) {
       io.XcptInvalid := false.B
       io.operandB := regFile.io.resp_2.data
+
+      io.outRsAddr := io.inInstr(19, 15)
+      io.outRtAddr := io.inInstr(24, 20)
 
       switch(funct3) {
         is("b000".U) {
@@ -108,6 +111,8 @@ class IDstage extends Module {
     is("b0010011".U) {
       io.XcptInvalid := false.B
       io.operandB := Cat(Fill(20, io.inInstr(31)), io.inInstr(31, 20))
+
+      io.outRsAddr := io.inInstr(19, 15)
 
       switch(funct3) {
         is("b000".U) {
