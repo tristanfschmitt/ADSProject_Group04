@@ -114,4 +114,22 @@ class PipelinedRV32Icore (BinaryFile: String) extends Module {
   io.check_res := wbBarrier.io.inCheckRes
   io.exception := wbBarrier.io.inXcptInvalid
 
+  wbBarrier.io.inRD := wbStage.io.outRd
+
+  //Forwarding ---------------------------------------------------------------------
+
+  idBarrier.io.inRsAddr := idStage.io.outRsAddr
+  idBarrier.io.inRtAddr := idStage.io.outRtAddr
+
+  exStage.io.rdEX := exBarrier.io.outRD
+  exStage.io.rdMEM := memBarrier.io.outRD
+  exStage.io.rdWB := wbBarrier.io.outRD
+
+  exStage.io.aluResEX := exBarrier.io.outAluResult
+  exStage.io.aluResMEM := memBarrier.io.outAluResult
+  exStage.io.aluResWB := wbBarrier.io.outCheckRes
+
+  exStage.io.RsAddr := idBarrier.io.outRsAddr
+  exStage.io.RtAddr := idBarrier.io.outRtAddr
+
 }

@@ -16,6 +16,9 @@ class IDstage extends Module {
     val operandA = Output(UInt(32.W))
     val operandB = Output(UInt(32.W))
     val XcptInvalid = Output(Bool())
+
+    val outRsAddr = Output(UInt(5.W))
+    val outRtAddr = Output(UInt(5.W))
   })
 
   val regFile = Module(new regFile)
@@ -24,6 +27,9 @@ class IDstage extends Module {
 
   regFile.io.req_1.addr := io.inInstr(19, 15)
   regFile.io.req_2.addr := io.inInstr(24, 20)
+
+  io.outRsAddr := io.inInstr(19, 15)
+  io.outRtAddr := io.inInstr(24, 20)
 
   regFile.io.req_3.wr_en := false.B
   regFile.io.req_3.addr := 0.U

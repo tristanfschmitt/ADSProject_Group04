@@ -36,17 +36,22 @@ class WBbarrier extends Module {
   val io = IO(new Bundle {
     val inCheckRes = Input(UInt(32.W))
     val inXcptInvalid = Input(Bool())
+    val inRD = Input(UInt(5.W))
 
     val outCheckRes = Output(UInt(32.W))
     val outXcptInvalid = Output(Bool())
+    val outRD = Output(UInt(5.W))
   })
 
   val checkResReg = RegInit(0.U(32.W))
   val xcptInvalidReg = RegInit(false.B)
+  val rdReg = RegInit(0.U(5.W))
 
   checkResReg := io.inCheckRes
   xcptInvalidReg := io.inXcptInvalid
+  rdReg := io.inRD
 
   io.outCheckRes := checkResReg
   io.outXcptInvalid := xcptInvalidReg
+  io.outRD := rdReg
 }

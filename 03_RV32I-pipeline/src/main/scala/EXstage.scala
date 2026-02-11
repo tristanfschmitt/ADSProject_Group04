@@ -47,6 +47,17 @@ class EXstage extends Module {
     val inOperandB = Input(UInt(32.W))
     val inXcptInvalid = Input(Bool())
 
+    val RsAddr = Input(UInt(5.W))
+    val RtAddr = Input(UInt(5.W))
+
+    val rdEX = Input(UInt(5.W))
+    val rdMEM = Input(UInt(5.W))
+    val rdWB = Input(UInt(5.W))
+
+    val aluResEX = Input(UInt(32.W))
+    val aluResMEM = Input(UInt(32.W))
+    val aluResWB = Input(UInt(32.W))
+
     val aluResult = Output(UInt(32.W))
     val exception = Output(Bool())
   })
@@ -58,6 +69,28 @@ class EXstage extends Module {
   alu.io.operation := ALUOp.PASSB
 
   io.aluResult := 0.U
+
+  when(io.RsAddr =/= 0.U && io.RsAddr === io.rdEX) {
+    alu.io.operandA := io.aluResEX
+  } .elsewhen(io.RsAddr =/= 0.U && io.RsAddr === io.rdMEM) {
+    alu.io.operandA := io.aluResMEM
+  } .elsewhen(io.RsAddr =/= 0.U && io.RsAddr === io.rdWB) {
+    alu.io.operandA := io.aluResWB
+  }
+
+  when(io.RtAddr =/= 0.U && io.RtAddr === io.rdEX) {
+    alu.io.operandB := io.aluResEX
+  } .elsewhen(io.RtAddr =/= 0.U && io.RtAddr === io.rdMEM) {
+    alu.io.operandB := io.aluResMEM
+  } .elsewhen(io.RtAddr =/= 0.U && io.RtAddr === io.rdWB) {
+    alu.io.operandB := io.aluResWB
+  }
+
+  when(io.inXcptInvalid === false.B) {
+    io.exception := false.B
+  }.otherwise {
+    io.exception := true.B
+  }
 
   when(io.inXcptInvalid === false.B) {
     switch(io.inUOP) {
