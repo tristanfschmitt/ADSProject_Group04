@@ -10,18 +10,24 @@ class IDstage extends Module {
     val inRd = Input(UInt(5.W))
     val inWd = Input(UInt(32.W))
     val inWr_en = Input(Bool())
+    val inPC = Input(UInt(32.W))
 
     val uop = Output(uopc())
     val rd = Output(UInt(5.W))
     val operandA = Output(UInt(32.W))
     val operandB = Output(UInt(32.W))
     val XcptInvalid = Output(Bool())
+    val outPC = Output(UInt(32.W))
+    val outPCSrc = Output(Bool())
 
     val outRsAddr = Output(UInt(5.W))
     val outRtAddr = Output(UInt(5.W))
   })
 
   val regFile = Module(new regFile)
+
+  io.outPCSrc := false.B
+  io.outPC := 0.U
 
   io.rd := io.inInstr(11, 7)
 
@@ -144,6 +150,47 @@ class IDstage extends Module {
           }.elsewhen(funct7 === "b0100000".U) {
             io.uop := uopc.SRAI
           }
+        }
+      }
+    }
+    is("b1101111".U) {
+      io.XcptInvalid := false.B
+      io.rd := 0.U
+      io.uop := uopc.NOP
+
+      regFile.io.req_3.addr := io.inInstr(11, 7)
+      regFile.io.req_3.data := io.inPC
+      regFile.io.req_3.wr_en := true.B
+
+      val jalImm20 = Cat(
+        io.inInstr(31),          // imm[20]
+        io.inInstr(19,12),       // imm[19:12]
+        io.inInstr(20),          // imm[11]
+        io.inInstr(30,21),       // imm[10:1]
+      )
+
+      // Sign-extend
+      val jalImm = Cat(Fill(12, jalImm20(19)), jalImm20)
+
+      io.outPC := io.inPC + jalImm + 1.U
+
+      io.outPCSrc := true.B
+
+    }
+    is("b1100111".U) {
+      switch(funct3) {
+        is("b000".U) {
+          io.XcptInvalid := false.B
+          io.rd := 0.U
+          io.uop := uopc.NOP
+
+          regFile.io.req_3.addr := io.inInstr(11, 7)
+          regFile.io.req_3.data := io.inPC
+          regFile.io.req_3.wr_en := true.B
+
+          io.outPC := Cat(Fill(20, io.inInstr(31)), io.inInstr(31, 20)) + regFile.io.resp_1.data
+
+          io.outPCSrc := true.B
         }
       }
     }

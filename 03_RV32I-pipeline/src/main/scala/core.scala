@@ -132,4 +132,12 @@ class PipelinedRV32Icore (BinaryFile: String) extends Module {
   exStage.io.RsAddr := idBarrier.io.outRsAddr
   exStage.io.RtAddr := idBarrier.io.outRtAddr
 
+  //Jump ---------------------------------------------------------------------------
+
+  ifBarrier.io.inPC := ifStage.io.outPC
+  idStage.io.inPC := ifBarrier.io.outPC
+
+  ifStage.io.inPCNew := idStage.io.outPC
+  ifStage.io.inPCSrc := idStage.io.outPCSrc
+
 }

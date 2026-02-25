@@ -29,7 +29,8 @@ import chisel3.experimental.ChiselEnum
 
 object uopc extends ChiselEnum {
   val NOP,
-  /*R-Type*/ ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND,
-  /*I-Type*/ ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI
+  /*R-Type*/   ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND,
+  /*I-Type*/   ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI,
+  /*J/B-Type*/ BEQ, BNE, BLT, BGE, BLTU, BGEU, JAL, JALR
   = Value
 }
