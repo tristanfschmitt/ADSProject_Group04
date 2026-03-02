@@ -58,11 +58,20 @@ class EXstage extends Module {
     val aluResMEM = Input(UInt(32.W))
     val aluResWB = Input(UInt(32.W))
 
+    val inBranchDest = Input(UInt(32.W))
+    val outPCnew = Output(UInt(32.W))
+
     val aluResult = Output(UInt(32.W))
     val exception = Output(Bool())
+    val outFlush = Output(Bool())
   })
 
   val alu = Module(new ALU)
+
+  val branchTaken = WireDefault(false.B)
+
+  io.outFlush := false.B
+  io.outPCnew := 0.U
 
   alu.io.operation := ALUOp.PASSB
 
@@ -126,6 +135,54 @@ class EXstage extends Module {
       is(uopc.SLTU, uopc.SLTIU) {
         alu.io.operation := ALUOp.SLTU
       }
+      is(uopc.BEQ) {
+        alu.io.operation := ALUOp.SUB
+        when(alu.io.zero === 1.B){
+          branchTaken := true.B
+        }.otherwise {
+          branchTaken := false.B
+        }
+      }
+      is(uopc.BNE) {
+        alu.io.operation := ALUOp.SUB
+        when(alu.io.zero === 1.B) {
+          branchTaken := false.B
+        }.otherwise {
+          branchTaken := true.B
+        }
+      }
+      is(uopc.BLT) {
+        alu.io.operation := ALUOp.SLT
+        when(alu.io.zero === 1.B) {
+          branchTaken := false.B
+        }.otherwise {
+          branchTaken := true.B
+        }
+      }
+      is(uopc.BGE) {
+        alu.io.operation := ALUOp.SLT
+        when(alu.io.zero === 1.B) {
+          branchTaken := true.B
+        }.otherwise {
+          branchTaken := false.B
+        }
+      }
+      is(uopc.BLTU) {
+        alu.io.operation := ALUOp.SLTU
+        when(alu.io.zero === 1.B) {
+          branchTaken := false.B
+        }.otherwise {
+          branchTaken := true.B
+        }
+      }
+      is(uopc.BGEU) {
+        alu.io.operation := ALUOp.SLTU
+        when(alu.io.zero === 1.B) {
+          branchTaken := true.B
+        }.otherwise {
+          branchTaken := false.B
+        }
+      }
     }
 
     io.exception := false.B
@@ -133,6 +190,11 @@ class EXstage extends Module {
     io.aluResult := alu.io.aluResult
   }.otherwise {
     io.exception := true.B
+  }
+
+  when(branchTaken === true.B) {
+    io.outFlush := true.B
+    io.outPCnew := io.inBranchDest
   }
 
 }

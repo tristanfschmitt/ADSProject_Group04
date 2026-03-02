@@ -34,6 +34,7 @@ class IFbarrier extends Module {
     val inPC = Input(UInt(32.W))
     val outPC = Output(UInt(32.W))
     val outInstr = Output(UInt(32.W))
+    val inFlush = Input(Bool())
   })
 
   val instrReg = RegInit(0.U(32.W))
@@ -42,7 +43,12 @@ class IFbarrier extends Module {
   instrReg := io.inInstr
   pcReg := io.inPC
 
-  io.outInstr := instrReg
+  when(io.inFlush === true.B) {
+    io.outInstr := "h00000013".U
+  }.otherwise {
+    io.outInstr := instrReg
+  }
+
   io.outPC := pcReg
 
 }

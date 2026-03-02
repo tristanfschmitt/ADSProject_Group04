@@ -140,4 +140,12 @@ class PipelinedRV32Icore (BinaryFile: String) extends Module {
   ifStage.io.inPCNew := idStage.io.outPC
   ifStage.io.inPCSrc := idStage.io.outPCSrc
 
+  //Branch -------------------------------------------------------------------------
+
+  idBarrier.io.inBranchDest := idStage.io.outBranchDest
+  exStage.io.inBranchDest := idBarrier.io.outBranchDest
+  idStage.io.inFlush   := exStage.io.outFlush
+  ifStage.io.inPCSrcEx := exStage.io.outFlush
+  ifStage.io.inPCNewEx := exStage.io.outPCnew
+  ifBarrier.io.inFlush := exStage.io.outFlush
 }

@@ -22,6 +22,7 @@ class ALU extends Module {
     val operandB = Input(UInt(32.W))
     val operation = Input(ALUOp())
     val aluResult = Output(UInt(32.W))
+    val zero = Output(Bool())
   })
 
   io.aluResult := 0.U
@@ -40,4 +41,10 @@ class ALU extends Module {
     is(ALUOp.PASSB) { io.aluResult := io.operandB}
   }
 
+  when(io.aluResult === 0.U) {
+    io.zero := 1.B
+  }.otherwise {
+    io.zero := 0.B
+  }
 }
+

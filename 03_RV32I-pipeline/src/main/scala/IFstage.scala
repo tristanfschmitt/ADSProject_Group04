@@ -42,22 +42,30 @@ import chisel3.util.experimental.loadMemoryFromFile
 class IFstage (BinaryFile: String) extends Module {
   val io = IO(new Bundle {
     val inPCNew = Input(UInt(32.W))
+    val inPCNewEx = Input(UInt(32.W))
     val inPCSrc = Input(Bool())
+    val inPCSrcEx = Input(Bool())
 
     val instr = Output(UInt(32.W))
     val outPC = Output(UInt(32.W))
   })
+
   val PC = RegInit(0.U(32.W))
   val IMem = Mem(4096, UInt(32.W))
 
   loadMemoryFromFile(IMem, BinaryFile)
 
-  when(io.inPCSrc) {
-    PC := io.inPCNew
-    io.instr := IMem(io.inPCNew)
-  } .otherwise {
-    io.instr := IMem(PC)
-    PC := PC + 1.U
+  when(io.inPCSrcEx) {
+    PC := io.inPCNewEx
+    io.instr := IMem(io.inPCNewEx)
+  }.otherwise {
+    when(io.inPCSrc) {
+      PC := io.inPCNew
+      io.instr := IMem(io.inPCNew)
+    } .otherwise {
+      io.instr := IMem(PC)
+      PC := PC + 1.U
+    }
   }
 
   io.outPC := PC
