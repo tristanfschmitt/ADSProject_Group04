@@ -217,7 +217,7 @@ class IDstage extends Module {
 
         val branchImm = Cat(Fill(20, branchImm12(11)), branchImm12)
 
-        io.outBranchDest := io.inPC + branchImm + 1.U
+        io.outBranchDest := io.inPC + branchImm
 
         io.operandB := regFile.io.resp_2.data
 

@@ -98,3 +98,5 @@ fff00113 // ADDI x2, x0, -1                       extra test cases
 00228293 // addi x5, x5, 2
 00000013 // NOP
 00000013 // NOP
+00000013 // NOP
+00000013 // NOP
