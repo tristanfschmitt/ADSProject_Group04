@@ -43,7 +43,8 @@ class IFbarrier extends Module {
   instrReg := io.inInstr
   pcReg := io.inPC
 
-  when(io.inFlush === true.B) {
+  when(io.inFlush) {
+    instrReg := "h00000013".U
     io.outInstr := "h00000013".U
   }.otherwise {
     io.outInstr := instrReg
