@@ -59,6 +59,7 @@ class EXstage extends Module {
     val aluResWB = Input(UInt(32.W))
 
     val inBranchDest = Input(UInt(32.W))
+
     val outPCnew = Output(UInt(32.W))
 
     val aluResult = Output(UInt(32.W))
@@ -69,130 +70,130 @@ class EXstage extends Module {
   val alu = Module(new ALU)
 
   val branchTaken = WireDefault(false.B)
+  val aluOp = WireDefault(ALUOp.PASSB)
+  val validOp = WireDefault(false.B)
 
   io.outFlush := false.B
   io.outPCnew := 0.U
-
-  alu.io.operation := ALUOp.PASSB
 
   io.aluResult := 0.U
 
   when(io.RsAddr =/= 0.U && io.RsAddr === io.rdEX) {
     alu.io.operandA := io.aluResEX
-  } .elsewhen(io.RsAddr =/= 0.U && io.RsAddr === io.rdMEM) {
+  }.elsewhen(io.RsAddr =/= 0.U && io.RsAddr === io.rdMEM) {
     alu.io.operandA := io.aluResMEM
-  } .elsewhen(io.RsAddr =/= 0.U && io.RsAddr === io.rdWB) {
+  }.elsewhen(io.RsAddr =/= 0.U && io.RsAddr === io.rdWB) {
     alu.io.operandA := io.aluResWB
-  } .otherwise {
+  }.otherwise {
     alu.io.operandA := io.inOperandA
   }
 
   when(io.RtAddr =/= 0.U && io.RtAddr === io.rdEX) {
     alu.io.operandB := io.aluResEX
-  } .elsewhen(io.RtAddr =/= 0.U && io.RtAddr === io.rdMEM) {
+  }.elsewhen(io.RtAddr =/= 0.U && io.RtAddr === io.rdMEM) {
     alu.io.operandB := io.aluResMEM
-  } .elsewhen(io.RtAddr =/= 0.U && io.RtAddr === io.rdWB) {
+  }.elsewhen(io.RtAddr =/= 0.U && io.RtAddr === io.rdWB) {
     alu.io.operandB := io.aluResWB
-  } .otherwise {
+  }.otherwise {
     alu.io.operandB := io.inOperandB
   }
 
-  when(io.inXcptInvalid === false.B) {
-    io.exception := false.B
-  }.otherwise {
-    io.exception := true.B
-  }
+  when(!io.inXcptInvalid) {
 
-  when(io.inXcptInvalid === false.B) {
     switch(io.inUOP) {
+
+      is(uopc.NOP) {
+        validOp := true.B
+      }
       is(uopc.ADD, uopc.ADDI) {
-        alu.io.operation := ALUOp.ADD
+        aluOp := ALUOp.ADD
+        validOp := true.B
       }
       is(uopc.SUB) {
-        alu.io.operation := ALUOp.SUB
+        aluOp := ALUOp.SUB
+        validOp := true.B
       }
       is(uopc.AND, uopc.ANDI) {
-        alu.io.operation := ALUOp.AND
+        aluOp := ALUOp.AND
+        validOp := true.B
       }
       is(uopc.OR, uopc.ORI) {
-        alu.io.operation := ALUOp.OR
+        aluOp := ALUOp.OR
+        validOp := true.B
       }
       is(uopc.XOR, uopc.XORI) {
-        alu.io.operation := ALUOp.XOR
+        aluOp := ALUOp.XOR
+        validOp := true.B
       }
       is(uopc.SLL, uopc.SLLI) {
-        alu.io.operation := ALUOp.SLL
+        aluOp := ALUOp.SLL
+        validOp := true.B
       }
       is(uopc.SRL, uopc.SRLI) {
-        alu.io.operation := ALUOp.SRL
+        aluOp := ALUOp.SRL
+        validOp := true.B
       }
       is(uopc.SRA, uopc.SRAI) {
-        alu.io.operation := ALUOp.SRA
+        aluOp := ALUOp.SRA
+        validOp := true.B
       }
       is(uopc.SLT, uopc.SLTI) {
-        alu.io.operation := ALUOp.SLT
+        aluOp := ALUOp.SLT
+        validOp := true.B
       }
       is(uopc.SLTU, uopc.SLTIU) {
-        alu.io.operation := ALUOp.SLTU
+        aluOp := ALUOp.SLTU
+        validOp := true.B
       }
-      is(uopc.BEQ) {
-        alu.io.operation := ALUOp.SUB
-        when(alu.io.zero === 1.B){
-          branchTaken := true.B
-        }.otherwise {
-          branchTaken := false.B
-        }
+
+      is(uopc.BEQ, uopc.BNE) {
+        aluOp := ALUOp.SUB
+        validOp := true.B
       }
-      is(uopc.BNE) {
-        alu.io.operation := ALUOp.SUB
-        when(alu.io.zero === 1.B) {
-          branchTaken := false.B
-        }.otherwise {
-          branchTaken := true.B
-        }
+
+      is(uopc.BLT, uopc.BGE) {
+        aluOp := ALUOp.SLT
+        validOp := true.B
       }
-      is(uopc.BLT) {
-        alu.io.operation := ALUOp.SLT
-        when(alu.io.zero === 1.B) {
-          branchTaken := false.B
-        }.otherwise {
-          branchTaken := true.B
-        }
-      }
-      is(uopc.BGE) {
-        alu.io.operation := ALUOp.SLT
-        when(alu.io.zero === 1.B) {
-          branchTaken := true.B
-        }.otherwise {
-          branchTaken := false.B
-        }
-      }
-      is(uopc.BLTU) {
-        alu.io.operation := ALUOp.SLTU
-        when(alu.io.zero === 1.B) {
-          branchTaken := false.B
-        }.otherwise {
-          branchTaken := true.B
-        }
-      }
-      is(uopc.BGEU) {
-        alu.io.operation := ALUOp.SLTU
-        when(alu.io.zero === 1.B) {
-          branchTaken := true.B
-        }.otherwise {
-          branchTaken := false.B
-        }
+
+      is(uopc.BLTU, uopc.BGEU) {
+        aluOp := ALUOp.SLTU
+        validOp := true.B
       }
     }
-
-    io.exception := false.B
-
-    io.aluResult := alu.io.aluResult
-  }.otherwise {
-    io.exception := true.B
   }
 
-  when(branchTaken === true.B) {
+  io.exception := io.inXcptInvalid || !validOp
+
+  alu.io.operation := aluOp
+
+  when(!io.inXcptInvalid) {
+    switch(io.inUOP) {
+
+      is(uopc.BEQ) {
+        branchTaken := alu.io.aluResult === 0.U
+      }
+      is(uopc.BNE) {
+        branchTaken := alu.io.aluResult =/= 0.U
+      }
+      is(uopc.BLT) {
+        branchTaken := alu.io.aluResult === 1.U
+      }
+      is(uopc.BGE) {
+        branchTaken := alu.io.aluResult === 0.U
+      }
+      is(uopc.BLTU) {
+        branchTaken := alu.io.aluResult === 1.U
+      }
+      is(uopc.BGEU) {
+        branchTaken := alu.io.aluResult === 0.U
+      }
+    }
+  }
+
+  io.aluResult := alu.io.aluResult
+
+  when(branchTaken && validOp && !io.inXcptInvalid) {
     io.outFlush := true.B
     io.outPCnew := io.inBranchDest
   }

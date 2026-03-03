@@ -60,10 +60,10 @@ fff00113 // ADDI x2, x0, -1                       extra test cases
 00000e13
 00000e93
 00000f13
-00000f93 //end clear
-00108093 //addi x1, x1, 1
-00208093 //addi x1, x1, 2
-00400fef // jal x31, 4
+00000f93 // end clear
+00108093 // addi x1, x1, 1
+00208093 // addi x1, x1, 2
+00800fef // jal x31, 4
 00308093 // addi x1, x1, 3
 00408093 // addi x1, x1, 4
 00508093 // addi x1, x1, 5
@@ -93,7 +93,7 @@ fff00113 // ADDI x2, x0, -1                       extra test cases
 00000013 // NOP
 00000013 // NOP
 00000013 // NOP
-00419463 // beq x3, x4, 2
+00418263 // beq x3, x4, 2
 00128293 // addi x5, x5, 1
 00228293 // addi x5, x5, 2
 00000013 // NOP

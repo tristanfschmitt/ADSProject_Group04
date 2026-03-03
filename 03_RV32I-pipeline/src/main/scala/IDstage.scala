@@ -65,6 +65,7 @@ class IDstage extends Module {
   when(io.inFlush) {
     io.uop := uopc.NOP
     io.rd := 0.U
+    io.XcptInvalid := false.B
   }.otherwise {
     switch(opcode) {
       is("b0110011".U) {
@@ -207,37 +208,42 @@ class IDstage extends Module {
         }
       }
       is("b1100011".U) { //Branch
-        val branchImm13 = Cat(
+        val branchImm12 = Cat(
           io.inInstr(31), // imm[12]
           io.inInstr(7), // imm[11]
           io.inInstr(30, 25), // imm[10:5]
-          io.inInstr(11, 8), // imm[4:1]
-          0.U(1.W) // imm[0] = 0
+          io.inInstr(11, 8) // imm[4:1]
         )
 
-        val branchImm = Cat(Fill(19, branchImm13(12)), branchImm13)
+        val branchImm = Cat(Fill(20, branchImm12(11)), branchImm12)
 
-        io.outBranchDest := io.inPC + branchImm
+        io.outBranchDest := io.inPC + branchImm + 1.U
 
         io.operandB := regFile.io.resp_2.data
 
         switch(funct3) {
           is("b000".U) { //BEQ
+            io.XcptInvalid := false.B
             io.uop := uopc.BEQ
           }
           is("b001".U) { //BNE
+            io.XcptInvalid := false.B
             io.uop := uopc.BNE
           }
           is("b100".U) { //BLT
+            io.XcptInvalid := false.B
             io.uop := uopc.BLT
           }
           is("b101".U) { //BGE
+            io.XcptInvalid := false.B
             io.uop := uopc.BGE
           }
           is("b110".U) { //BLTU
+            io.XcptInvalid := false.B
             io.uop := uopc.BLTU
           }
           is("b111".U) { //BGEU
+            io.XcptInvalid := false.B
             io.uop := uopc.BGEU
           }
         }
