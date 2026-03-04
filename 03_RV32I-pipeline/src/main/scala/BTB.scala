@@ -24,7 +24,8 @@ class BTB extends Module {
   io.target := 0.U
   io.predictTaken := 0.B
 
-  val BTB_mem = Mem(8, UInt(128.W))
+  val BTB_mem = RegInit(VecInit(Seq.fill(8)(0.U(128.W))))
+  val lru = RegInit(VecInit(Seq.fill(8)(false.B)))
 
   val w_index = io.updatePC(2, 0)
 
@@ -68,6 +69,7 @@ class BTB extends Module {
       }
 
       BTB_mem(w_index) := Cat(w_line(127, 2), newCounter)
+      lru(w_index) := true.B
 
     }.elsewhen(w_tag === w_tag2 && w_valid2) {
 
@@ -89,14 +91,21 @@ class BTB extends Module {
       }
 
       BTB_mem(w_index) := Cat(w_line(127, 66), newCounter, w_line(63, 0))
+      lru(w_index) := false.B
 
     }.otherwise {
       when(!w_valid1) {
         BTB_mem(w_index) := Cat(w_line(127, 64), 1.U, w_tag, io.updateTarget, 0.U, 0.U)
+        lru(w_index) := true.B
       }.elsewhen(!w_valid2) {
         BTB_mem(w_index) := Cat(1.U, w_tag, io.updateTarget, 0.U, 0.U, w_line(63, 0))
-      }.otherwise {
+        lru(w_index) := false.B
+      }.elsewhen(!lru(w_index)) {
         BTB_mem(w_index) := Cat(w_line(127, 64), 1.U, w_tag, io.updateTarget, 0.U, 0.U)
+        lru(w_index) := true.B
+      }.otherwise {
+        BTB_mem(w_index) := Cat(1.U, w_tag, io.updateTarget, 0.U, 0.U, w_line(63, 0))
+        lru(w_index) := false.B
       }
     }
   }
@@ -136,6 +145,10 @@ class BTB extends Module {
     }
 
     io.valid := 1.B
+
+    when(!(io.update && (w_index === r_index))) {
+      lru(r_index) := true.B
+    }
   }.elsewhen(r_tag === r_tag2 && r_valid2) {
     io.target := r_branchTargetAddr2
 
@@ -150,6 +163,10 @@ class BTB extends Module {
     }
 
     io.valid := 1.B
+
+    when(!(io.update && (w_index === r_index))) {
+      lru(r_index) := false.B
+    }
   }.otherwise {
     io.valid := 0.B
   }

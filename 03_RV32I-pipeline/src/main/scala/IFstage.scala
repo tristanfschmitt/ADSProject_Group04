@@ -53,6 +53,7 @@ class IFstage(BinaryFile: String) extends Module {
     val instr = Output(UInt(32.W))
     val outPC = Output(UInt(32.W))
     val PC = Output(UInt(32.W))
+    val predTaken = Output(Bool())
   })
 
   val PC = RegInit(0.U(32.W))
@@ -62,23 +63,26 @@ class IFstage(BinaryFile: String) extends Module {
 
   io.PC := PC
 
+  io.predTaken := 0.B
+
+  val instrPC = Wire(UInt(32.W))
   val nextPC = Wire(UInt(32.W))
+  instrPC := PC
   nextPC := PC + 1.U
 
   when(io.inPCSrcEx) {
-    nextPC := io.inPCNewEx
-    io.instr := IMem(io.inPCNewEx)
+    instrPC := io.inPCNewEx
+    nextPC := io.inPCNewEx + 1.U
   }.elsewhen(io.inPCSrc) {
-    nextPC := io.inPCNew
-    io.instr := IMem(io.inPCNew)
+    instrPC := io.inPCNew
+    nextPC := io.inPCNew + 1.U
   }.elsewhen(io.valid && io.predictTaken) {
     nextPC := io.target
-    io.instr := IMem(io.target)
-  }.otherwise {
-    io.instr := IMem(PC)
+    io.predTaken := 1.B
   }
 
-  PC := nextPC
+  io.instr := IMem(instrPC)
+  io.outPC := instrPC
 
-  io.outPC := PC
+  PC := nextPC
 }

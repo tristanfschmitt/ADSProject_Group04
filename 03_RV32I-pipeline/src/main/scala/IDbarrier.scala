@@ -49,6 +49,7 @@ class IDbarrier extends Module {
     val inRsAddr = Input(UInt(5.W))
     val inRtAddr = Input(UInt(5.W))
     val inPC = Input(UInt(32.W))
+    val inPredTaken = Input(Bool())
 
     val inBranchDest = Input(UInt(32.W))
     val outBranchDest = Output(UInt(32.W))
@@ -61,6 +62,7 @@ class IDbarrier extends Module {
     val outXcptInvalid = Output(Bool())
     val outRsAddr = Output(UInt(5.W))
     val outRtAddr = Output(UInt(5.W))
+    val outPredTaken = Output(Bool())
   })
 
   val UOPReg = RegInit(uopc.NOP)
@@ -72,6 +74,7 @@ class IDbarrier extends Module {
   val RtAddrReg = RegInit(0.U(5.W))
   val BranchDestReg = RegInit(0.U(32.W))
   val PCReg = RegInit(0.U(32.W))
+  val predTakenReg = RegInit(false.B)
 
   UOPReg         := io.inUOP
   RDReg          := io.inRD
@@ -82,6 +85,7 @@ class IDbarrier extends Module {
   RtAddrReg      := io.inRtAddr
   BranchDestReg  := io.inBranchDest
   PCReg          := io.inPC
+  predTakenReg   := io.inPredTaken
 
   io.outUOP       := UOPReg
   io.outRD        := RDReg
@@ -90,6 +94,7 @@ class IDbarrier extends Module {
   io.outXcptInvalid := xcptInvalidReg
   io.outRsAddr      := RsAddrReg
   io.outRtAddr      := RtAddrReg
+  io.outPredTaken   := predTakenReg
   io.outBranchDest  := BranchDestReg
   io.outPC := PCReg
 

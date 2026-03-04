@@ -166,12 +166,9 @@ class IDstage extends Module {
       }
       is("b1101111".U) { //JAL
         io.XcptInvalid := false.B
-        io.rd := 0.U
-        io.uop := uopc.NOP
-
-        regFile.io.req_3.addr := io.inInstr(11, 7)
-        regFile.io.req_3.data := io.inPC
-        regFile.io.req_3.wr_en := true.B
+        io.uop := uopc.ADDI
+        io.operandA := io.inPC
+        io.operandB := 0.U
 
         val jalImm20 = Cat(
           io.inInstr(31), // imm[20]
@@ -192,12 +189,9 @@ class IDstage extends Module {
         switch(funct3) {
           is("b000".U) {
             io.XcptInvalid := false.B
-            io.rd := 0.U
-            io.uop := uopc.NOP
-
-            regFile.io.req_3.addr := io.inInstr(11, 7)
-            regFile.io.req_3.data := io.inPC
-            regFile.io.req_3.wr_en := true.B
+            io.uop := uopc.ADDI
+            io.operandA := io.inPC
+            io.operandB := 0.U
 
             regFile.io.req_1.addr := io.inInstr(19, 15)
 
@@ -208,6 +202,10 @@ class IDstage extends Module {
         }
       }
       is("b1100011".U) { //Branch
+        io.rd := 0.U
+        io.outRsAddr := io.inInstr(19, 15)
+        io.outRtAddr := io.inInstr(24, 20)
+
         val branchImm12 = Cat(
           io.inInstr(31), // imm[12]
           io.inInstr(7), // imm[11]

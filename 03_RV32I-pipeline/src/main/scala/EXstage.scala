@@ -60,6 +60,7 @@ class EXstage extends Module {
 
     val inBranchDest = Input(UInt(32.W))
     val branchPC = Input(UInt(32.W))
+    val inPredTaken = Input(Bool())
 
     val outPCnew = Output(UInt(32.W))
 
@@ -206,9 +207,17 @@ class EXstage extends Module {
 
   io.aluResult := alu.io.aluResult
 
-  when(branchTaken && validOp && !io.inXcptInvalid) {
+  val isBranch = io.inUOP === uopc.BEQ || io.inUOP === uopc.BNE ||
+    io.inUOP === uopc.BLT || io.inUOP === uopc.BGE ||
+    io.inUOP === uopc.BLTU || io.inUOP === uopc.BGEU
+
+  when(isBranch && validOp && !io.inXcptInvalid && (branchTaken =/= io.inPredTaken)) {
     io.outFlush := true.B
-    io.outPCnew := io.inBranchDest
+    when(branchTaken) {
+      io.outPCnew := io.inBranchDest
+    }.otherwise {
+      io.outPCnew := io.branchPC + 1.U
+    }
   }
 
 }

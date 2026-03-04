@@ -136,6 +136,7 @@ class PipelinedRV32Icore (BinaryFile: String) extends Module {
   //Jump ---------------------------------------------------------------------------
 
   ifBarrier.io.inPC := ifStage.io.outPC
+  ifBarrier.io.inPredTaken := ifStage.io.predTaken
   idStage.io.inPC := ifBarrier.io.outPC
 
   ifStage.io.inPCNew := idStage.io.outPC
@@ -144,7 +145,9 @@ class PipelinedRV32Icore (BinaryFile: String) extends Module {
   //Branch -------------------------------------------------------------------------
 
   idBarrier.io.inBranchDest := idStage.io.outBranchDest
+  idBarrier.io.inPredTaken := ifBarrier.io.outPredTaken
   exStage.io.inBranchDest := idBarrier.io.outBranchDest
+  exStage.io.inPredTaken := idBarrier.io.outPredTaken
   idStage.io.inFlush   := exStage.io.outFlush
   ifStage.io.inPCSrcEx := exStage.io.outFlush
   ifStage.io.inPCNewEx := exStage.io.outPCnew
