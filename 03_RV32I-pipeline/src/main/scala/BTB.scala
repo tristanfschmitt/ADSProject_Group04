@@ -4,10 +4,10 @@ import chisel3._
 import chisel3.util._
 
 // -----------------------------------------
-// prediction Unit
+// BTB Unit
 // -----------------------------------------
 
-class predictionUnit extends Module {
+class BTB extends Module {
   val io = IO(new Bundle {
     val PC = Input(UInt(32.W))
     val update = Input(Bool())

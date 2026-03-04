@@ -39,15 +39,20 @@ import chisel3.util.experimental.loadMemoryFromFile
 // Fetch Stage
 // -----------------------------------------
 
-class IFstage (BinaryFile: String) extends Module {
+class IFstage(BinaryFile: String) extends Module {
   val io = IO(new Bundle {
     val inPCNew = Input(UInt(32.W))
     val inPCNewEx = Input(UInt(32.W))
     val inPCSrc = Input(Bool())
     val inPCSrcEx = Input(Bool())
 
+    val valid = Input(Bool())
+    val target = Input(UInt(32.W))
+    val predictTaken = Input(Bool())
+
     val instr = Output(UInt(32.W))
     val outPC = Output(UInt(32.W))
+    val PC = Output(UInt(32.W))
   })
 
   val PC = RegInit(0.U(32.W))
@@ -55,18 +60,25 @@ class IFstage (BinaryFile: String) extends Module {
 
   loadMemoryFromFile(IMem, BinaryFile)
 
+  io.PC := PC
+
+  val nextPC = Wire(UInt(32.W))
+  nextPC := PC + 1.U
+
   when(io.inPCSrcEx) {
-    PC := io.inPCNewEx
+    nextPC := io.inPCNewEx
     io.instr := IMem(io.inPCNewEx)
+  }.elsewhen(io.inPCSrc) {
+    nextPC := io.inPCNew
+    io.instr := IMem(io.inPCNew)
+  }.elsewhen(io.valid && io.predictTaken) {
+    nextPC := io.target
+    io.instr := IMem(io.target)
   }.otherwise {
-    when(io.inPCSrc) {
-      PC := io.inPCNew
-      io.instr := IMem(io.inPCNew)
-    } .otherwise {
-      io.instr := IMem(PC)
-      PC := PC + 1.U
-    }
+    io.instr := IMem(PC)
   }
+
+  PC := nextPC
 
   io.outPC := PC
 }

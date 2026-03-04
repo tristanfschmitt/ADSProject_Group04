@@ -59,12 +59,18 @@ class EXstage extends Module {
     val aluResWB = Input(UInt(32.W))
 
     val inBranchDest = Input(UInt(32.W))
+    val branchPC = Input(UInt(32.W))
 
     val outPCnew = Output(UInt(32.W))
 
     val aluResult = Output(UInt(32.W))
     val exception = Output(Bool())
     val outFlush = Output(Bool())
+
+    val update = Output(Bool())
+    val updatePC = Output(UInt(32.W))
+    val updateTarget = Output(UInt(32.W))
+    val taken = Output(Bool())
   })
 
   val alu = Module(new ALU)
@@ -77,6 +83,11 @@ class EXstage extends Module {
   io.outPCnew := 0.U
 
   io.aluResult := 0.U
+
+  io.update := 0.B
+  io.taken := branchTaken
+  io.updateTarget := io.inBranchDest
+  io.updatePC := io.branchPC
 
   when(io.RsAddr =/= 0.U && io.RsAddr === io.rdEX) {
     alu.io.operandA := io.aluResEX
@@ -145,17 +156,14 @@ class EXstage extends Module {
         aluOp := ALUOp.SLTU
         validOp := true.B
       }
-
       is(uopc.BEQ, uopc.BNE) {
         aluOp := ALUOp.SUB
         validOp := true.B
       }
-
       is(uopc.BLT, uopc.BGE) {
         aluOp := ALUOp.SLT
         validOp := true.B
       }
-
       is(uopc.BLTU, uopc.BGEU) {
         aluOp := ALUOp.SLTU
         validOp := true.B
@@ -169,24 +177,29 @@ class EXstage extends Module {
 
   when(!io.inXcptInvalid) {
     switch(io.inUOP) {
-
       is(uopc.BEQ) {
         branchTaken := alu.io.aluResult === 0.U
+        io.update := 1.B
       }
       is(uopc.BNE) {
         branchTaken := alu.io.aluResult =/= 0.U
+        io.update := 1.B
       }
       is(uopc.BLT) {
         branchTaken := alu.io.aluResult === 1.U
+        io.update := 1.B
       }
       is(uopc.BGE) {
         branchTaken := alu.io.aluResult === 0.U
+        io.update := 1.B
       }
       is(uopc.BLTU) {
         branchTaken := alu.io.aluResult === 1.U
+        io.update := 1.B
       }
       is(uopc.BGEU) {
         branchTaken := alu.io.aluResult === 0.U
+        io.update := 1.B
       }
     }
   }

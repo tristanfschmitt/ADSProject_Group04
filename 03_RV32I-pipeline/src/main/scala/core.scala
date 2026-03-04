@@ -67,6 +67,7 @@ class PipelinedRV32Icore (BinaryFile: String) extends Module {
   val exStage = Module(new EXstage)
   val memStage = Module(new MEMstage)
   val wbStage = Module(new WBstage)
+  val BTB = Module(new BTB)
 
   val ifBarrier = Module(new IFbarrier)
   val idBarrier = Module(new IDbarrier)
@@ -148,4 +149,20 @@ class PipelinedRV32Icore (BinaryFile: String) extends Module {
   ifStage.io.inPCSrcEx := exStage.io.outFlush
   ifStage.io.inPCNewEx := exStage.io.outPCnew
   ifBarrier.io.inFlush := exStage.io.outFlush
+
+  //Branch Prediction --------------------------------------------------------------
+
+  BTB.io.update := exStage.io.update
+  BTB.io.updatePC := exStage.io.updatePC
+  BTB.io.updateTarget := exStage.io.updateTarget
+  BTB.io.taken := exStage.io.taken
+
+  BTB.io.PC := ifStage.io.PC
+
+  ifStage.io.valid := BTB.io.valid
+  ifStage.io.target := BTB.io.target
+  ifStage.io.predictTaken := BTB.io.predictTaken
+
+  idBarrier.io.inPC := ifBarrier.io.outPC
+  exStage.io.branchPC := idBarrier.io.outPC
 }

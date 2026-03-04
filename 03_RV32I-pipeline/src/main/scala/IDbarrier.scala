@@ -48,10 +48,12 @@ class IDbarrier extends Module {
     val inXcptInvalid = Input(Bool())
     val inRsAddr = Input(UInt(5.W))
     val inRtAddr = Input(UInt(5.W))
+    val inPC = Input(UInt(32.W))
 
     val inBranchDest = Input(UInt(32.W))
     val outBranchDest = Output(UInt(32.W))
 
+    val outPC = Output(UInt(32.W))
     val outUOP = Output(uopc())
     val outRD = Output(UInt(5.W))
     val outOperandA = Output(UInt(32.W))
@@ -69,6 +71,7 @@ class IDbarrier extends Module {
   val RsAddrReg = RegInit(0.U(5.W))
   val RtAddrReg = RegInit(0.U(5.W))
   val BranchDestReg = RegInit(0.U(32.W))
+  val PCReg = RegInit(0.U(32.W))
 
   UOPReg         := io.inUOP
   RDReg          := io.inRD
@@ -78,6 +81,7 @@ class IDbarrier extends Module {
   RsAddrReg      := io.inRsAddr
   RtAddrReg      := io.inRtAddr
   BranchDestReg  := io.inBranchDest
+  PCReg          := io.inPC
 
   io.outUOP       := UOPReg
   io.outRD        := RDReg
@@ -87,5 +91,6 @@ class IDbarrier extends Module {
   io.outRsAddr      := RsAddrReg
   io.outRtAddr      := RtAddrReg
   io.outBranchDest  := BranchDestReg
+  io.outPC := PCReg
 
 }
