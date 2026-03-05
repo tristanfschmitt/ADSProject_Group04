@@ -193,6 +193,9 @@ class IDstage extends Module {
             io.operandA := io.inPC
             io.operandB := 0.U
 
+            io.outRsAddr := io.inInstr(19, 15)
+            io.outRtAddr := 0.U
+
             regFile.io.req_1.addr := io.inInstr(19, 15)
 
             io.outPC := Cat(Fill(20, io.inInstr(31)), io.inInstr(31, 20)) + regFile.io.resp_1.data
