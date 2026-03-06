@@ -104,6 +104,23 @@ addi x14, x14, 12 // MUL x16, x14, x15
 addi x15, x15, 15
 add x16, x16, x15
 addi x14, x14, -1
-bne x14, x0, -2   // end MUL
+bne x14, x0, -2   // end MUL           // BTB line 010
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+beq x20, x20, 3                         // BTB line 010
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+bne x21, x20, 2                         // BTB line 010
+NOP
 NOP
 NOP
