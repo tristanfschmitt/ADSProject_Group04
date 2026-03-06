@@ -95,16 +95,16 @@ class BTB extends Module {
 
     }.otherwise {
       when(!w_valid1) {
-        BTB_mem(w_index) := Cat(w_line(127, 64), 1.U, w_tag, io.updateTarget, 0.U, 0.U)
+        BTB_mem(w_index) := Cat(w_line(127, 64), 1.U, w_tag, io.updateTarget, 0.U, 1.U) // 01 standard prediction weak not taken, da for, while usw. nur springen wenn diese aufhören
         lru(w_index) := true.B
       }.elsewhen(!w_valid2) {
-        BTB_mem(w_index) := Cat(1.U, w_tag, io.updateTarget, 0.U, 0.U, w_line(63, 0))
+        BTB_mem(w_index) := Cat(1.U, w_tag, io.updateTarget, 0.U, 1.U, w_line(63, 0)) // 01
         lru(w_index) := false.B
       }.elsewhen(!lru(w_index)) {
-        BTB_mem(w_index) := Cat(w_line(127, 64), 1.U, w_tag, io.updateTarget, 0.U, 0.U)
+        BTB_mem(w_index) := Cat(w_line(127, 64), 1.U, w_tag, io.updateTarget, 0.U, 1.U) // 01
         lru(w_index) := true.B
       }.otherwise {
-        BTB_mem(w_index) := Cat(1.U, w_tag, io.updateTarget, 0.U, 0.U, w_line(63, 0))
+        BTB_mem(w_index) := Cat(1.U, w_tag, io.updateTarget, 0.U, 1.U, w_line(63, 0)) // 01
         lru(w_index) := false.B
       }
     }
